@@ -23,6 +23,7 @@ namespace ConsoleAppCore
 				"1.Start to look for new data \n" +
 				"2.Exit the Program");
 			int whatTodo = Convert.ToInt32(Console.ReadLine());
+			int enumID = Convert.ToInt32(DataStatus.Success);
 			switch(whatTodo)
 			{
 				case 1:
@@ -37,6 +38,7 @@ namespace ConsoleAppCore
 						if(success)
 						{
 							Console.WriteLine("Process Completed Successfully");
+							dm.DeleteorUpdateFromMains(mainList);
 						}
 						else
 						{
