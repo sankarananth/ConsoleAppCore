@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Apache.NMS;
+using Apache.NMS.ActiveMQ;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 
@@ -6,13 +8,74 @@ namespace ConsoleAppCore
 {
 	class Program
 	{
+		static List<string> msgList = new List<string>();
 		static void Main(string[] args)
 		{
+		    while (ReadNextMessage())
+			{
 
-			onStart();
-			
+			}
+			InsertToDb(msgList);
 		}
-	     static void onStart()
+		static bool InsertToDb(List<string> msgList)
+		{
+			bool success = false;
+			//
+			foreach(string message in msgList)
+			{
+				//Sqlconnection code 
+				//Sqlcommand code
+				//parameter ("@message",message)
+				// int ret =cmd.ExecuteNonQuery();
+
+				//if(ret!=0)
+				//{
+				//  success=true;
+				//}
+				// else
+				//{
+				 //    success=false;
+				//}
+			}
+			return success;
+		}
+		static bool ReadNextMessage()
+		{
+			string queueName = "New";
+
+			string brokerUri = $"activemq:tcp://localhost:61616";  // Default port
+			NMSConnectionFactory factory = new NMSConnectionFactory(brokerUri);
+
+			using (IConnection connection = factory.CreateConnection())
+			{
+				connection.Start();
+				using (ISession session = connection.CreateSession(AcknowledgementMode.AutoAcknowledge))
+				using (IDestination dest = session.GetQueue(queueName))
+				using (IMessageConsumer consumer = session.CreateConsumer(dest))
+				{
+					
+					IMessage msg = consumer.Receive(TimeSpan.FromMilliseconds(2000));
+				
+					if (msg is ITextMessage)
+					{
+						ITextMessage txtMsg = msg as ITextMessage;
+					     msgList.Add(txtMsg.Text);
+						
+						Console.WriteLine($"Received message: {txtMsg.Text}");
+
+						return true;
+					}
+					else
+					{
+						Console.WriteLine("Unexpected message type: ");
+						return false;
+					}
+				}
+			}
+			
+		
+		}
+		static void onStart()
 		{
 			
 			Console.WriteLine("\t\t\t****************************************************** \n" +
@@ -63,4 +126,6 @@ namespace ConsoleAppCore
 			
 		}
 	}
+	
 }
+
