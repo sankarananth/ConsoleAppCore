@@ -16,6 +16,7 @@ namespace ConsoleAppCore
 
 			}
 			InsertToDb(msgList);
+			DeleteQueue();
 		}
 		static bool InsertToDb(List<string> msgList)
 		{
@@ -74,6 +75,31 @@ namespace ConsoleAppCore
 			}
 			
 		
+		}
+		static void DeleteQueue()
+		{
+			string queueName = "New";
+
+			string brokerUri = $"activemq:tcp://localhost:61616";  // Default port
+			NMSConnectionFactory factory = new NMSConnectionFactory(brokerUri);
+
+			using (Connection connection = factory.CreateConnection() as Connection)
+			{
+				connection.Start();
+			
+					using (ISession session = connection.CreateSession())
+					{
+						IQueue queue = session.GetQueue(queueName);
+						try
+						{
+							connection.DeleteDestination(queue);
+						}
+						catch
+						{
+						}
+					}
+				
+			}
 		}
 		static void onStart()
 		{
